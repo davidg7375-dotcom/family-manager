@@ -41,16 +41,18 @@ class MainActivity : Activity() {
         w.webViewClient = object : WebViewClient() {
             override fun onPageFinished(v: WebView, u: String) { loaded = true; push() }
         }
-        w.loadUrl("file:///android_asset/index.html")
+        if (b == null || w.restoreState(b) == null) w.loadUrl("file:///android_asset/index.html")
         val perms = if (Build.VERSION.SDK_INT >= 33) arrayOf(Manifest.permission.POST_NOTIFICATIONS, Manifest.permission.RECEIVE_SMS)
                     else arrayOf(Manifest.permission.RECEIVE_SMS)
         requestPermissions(perms, 1)
     }
 
+    override fun onSaveInstanceState(o: Bundle) { super.onSaveInstanceState(o); w.saveState(o) }
+
     override fun onResume() {
         super.onResume()
         push()
-        if (loaded) w.evaluateJavascript("if(window.render)render()", null)
+        if (loaded) w.evaluateJavascript("if(window.bgRender)bgRender()", null)
         val on = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")?.contains(packageName) == true
         val pf = getSharedPreferences("fm", 0)
         if (!on && !asked && !pf.getBoolean("askedN", false)) {

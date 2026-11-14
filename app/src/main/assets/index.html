@@ -66,6 +66,27 @@ nav{align-items:flex-end}nav button{min-height:52px}nav small{display:block;font
 .chart{display:flex;gap:6px;align-items:flex-end;margin-top:12px}.col{flex:1;text-align:center;cursor:pointer;opacity:.55}.col.sel{opacity:1}.bars{height:90px;display:flex;gap:2px;align-items:flex-end;justify-content:center}.bars i{width:40%;max-width:12px;border-radius:3px 3px 0 0;min-height:2px}.col span{font-size:11px;color:var(--mut)}
 .cg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin-top:8px}.cd{padding:6px 0;border-radius:10px;font-size:13px;cursor:pointer}.cd.sel{background:var(--ac);color:#fff}.cd.t{border:1px solid var(--ac)}.dots{height:6px;display:flex;gap:2px;justify-content:center;margin-top:2px}.dots i{width:5px;height:5px;border-radius:50%}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+html{-webkit-text-size-adjust:100%}*{-webkit-tap-highlight-color:transparent}
+body{font-variant-numeric:tabular-nums;line-height:1.45}
+main{padding:12px 14px}
+h2{font-size:22px;letter-spacing:-.2px;margin:10px 4px 12px}
+.card{padding:16px;border-radius:18px;border-color:transparent;box-shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card{border-color:var(--bd);box-shadow:none}}
+:root[data-theme="dark"] .card{border-color:var(--bd);box-shadow:none}
+.big{font-size:30px;letter-spacing:-.5px;line-height:1.2}
+input,select,textarea{border-radius:12px;background:var(--card);padding:11px 12px;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--ac);box-shadow:0 0 0 3px rgba(47,111,237,.22)}
+button{border-radius:12px;font-weight:600;user-select:none;transition:transform .08s,opacity .15s}
+button.g{background:var(--card)}
+.chip{font-weight:600}
+nav,header{-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+nav{background:rgba(255,255,255,.88)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) nav{background:rgba(27,32,43,.88)}}
+:root[data-theme="dark"] nav{background:rgba(27,32,43,.88)}
+.item{padding:12px 0}
+.qa button{border-radius:14px}
+.sheet{border-radius:24px 24px 0 0}
+.mut{line-height:1.5}
 </style>
 </head>
 <body>
@@ -159,7 +180,7 @@ function hdHtml(){var n=attnList().length;return '<b style="font-size:17px">ני
 var TG=(function(){try{return JSON.parse(localStorage.getItem('fmtg'))||{}}catch(e){return{}}})(),tgMsg='',tgCls='',tgT=0;
 function tgSave(){try{localStorage.setItem('fmtg',JSON.stringify(TG))}catch(e){}}
 function tgRead(){if($('#tgt')){TG.token=val('tgt');TG.chat=val('tgc');tgSave()}}
-function tgSet(m,c){tgMsg=m;tgCls=c;render()}
+function tgSet(m,c){tgMsg=m;tgCls=c;bgRender()}
 function tgErr(e){var m=e&&e.message||'שגיאה';tgSet('שגיאה: '+(m==='Failed to fetch'||m==='Load failed'?'אין חיבור, או שהתכונה זמינה רק באפליקציה המותקנת':m),'bad')}
 function tgGet(method,params){return fetch('https://api.telegram.org/bot'+TG.token+'/'+method+(params?'?'+new URLSearchParams(params):'')).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw new Error(j.description||'שגיאה');return j})}
 function tgSend(){if(!TG.token||!TG.chat){tgSet('חסרים טוקן או Chat ID','bad');return}
@@ -189,7 +210,7 @@ function tgCmd(t){t=t.trim();var m,out='';
 function tgNotify(){var al=attnList(),t=today(),k=TG.sentK||[],fr=TG.sentD!==t?al:al.filter(function(x){return k.indexOf(x.txt)<0});TG.sentD=t;TG.sentK=al.map(function(x){return x.txt});tgSave();if(!fr.length)return;return tgText('🔔 דורש טיפול:\n'+fr.map(function(x){return '• '+x.txt}).join('\n'))}
 function tgPoll(){if(tgBusy||!TG.token||!TG.chat)return;tgBusy=true;var ch=false;
  var p=TG.cmds?tgGet('getUpdates',{offset:TG.off||0}).then(function(r){var ps=[];(r.result||[]).forEach(function(u){TG.off=u.update_id+1;var m=u.message;if(m&&m.text&&String(m.chat.id)===TG.chat){ps.push(tgCmd(m.text));ch=true}});tgSave();return Promise.all(ps)}):Promise.resolve();
- return p.then(function(){if(TG.notif)return tgNotify()}).then(function(){if(ch){save();render()}}).catch(function(){}).then(function(){tgBusy=false})}
+ return p.then(function(){if(TG.notif)return tgNotify()}).then(function(){if(ch){save();bgRender()}}).catch(function(){}).then(function(){tgBusy=false})}
 function tgConnect(){tgRead();if(!TG.token){tgSet('הדבק את הטוקן','bad');return}
  tgGet('getMe').then(function(j){TG.bot=j.result.username;tgSave();return tgGet('getUpdates')}).then(function(r){var all=r.result||[],u=all.filter(function(x){return x.message});if(all.length)TG.off=all[all.length-1].update_id+1;
   if(!u.length){tgSet('הטוקן תקין (@'+TG.bot+'). שלח הודעה כלשהי לבוט ולחץ "חיבור" שוב','mut');return}
@@ -205,6 +226,12 @@ function tgCard(){var cn=TG.token&&TG.chat,h='<div class="card"><div class="row 
 function applyTheme(){try{var t=(S.ui&&S.ui.theme)||'auto',e=document.documentElement;if(t==='auto')e.removeAttribute('data-theme');else e.setAttribute('data-theme',t)}catch(e){}}
 function themeCard(){var t=(S.ui&&S.ui.theme)||'auto';return '<div class="card"><b>🎨 מראה</b><div class="row m8">'+[['auto','אוטומטי'],['light','בהיר'],['dark','כהה']].map(function(x){return '<button class="chip'+(x[0]===t?' on':'')+'" data-a="theme" data-i="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div></div>'}
 function permCard(){var W=window.Android,on=W&&W.notifOn?W.notifOn():null;return '<div class="card"><div class="row sp"><b>🔔 הרשאות זיהוי הוצאות</b>'+(on===null?'':'<span class="chip'+(on?' on':'')+'">'+(on?'גישה להתראות פעילה':'כבויה')+'</span>')+'</div>'+(W&&W.openSettings?'<div class="mut m8">אם המכשיר חוסם את ההפעלה: 1) לחץ "מידע על האפליקציה". 2) בפינה העליונה ⋮ ← "אפשר הגדרות מוגבלות". 3) חזור ולחץ "גישה להתראות" והפעל.</div><div class="row m8"><button class="g sm" data-a="osapp">מידע על האפליקציה</button><button class="g sm" data-a="osnotif">גישה להתראות</button></div>':'<div class="mut m8">זמין באפליקציה המותקנת.</div>')+'<div class="mut m8">לא מצליח? זיהוי SMS מכאל עובד גם בלי גישה להתראות. אפשר גם להדביק טקסט התראה ב"כספים ← בדיקת זיהוי הוצאה".</div></div>'}
+var pendR=false;
+function snapForm(){var o={};Array.prototype.forEach.call(document.querySelectorAll('#app input,#app select,#app textarea,#ov input,#ov select,#ov textarea'),function(e){if(e.id)o[e.id]=e.type==='checkbox'?e.checked:e.value});return o}
+function restoreForm(o){for(var k in o){var e=$('#'+k);if(e){if(e.type==='checkbox')e.checked=o[k];else e.value=o[k]}}}
+function bgRender(){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)){pendR=true;return}var st=snapForm();render();restoreForm(st)}
+document.addEventListener('focusout',function(){if(pendR)setTimeout(function(){var a=document.activeElement;if(!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))){pendR=false;bgRender()}},400)});
+document.addEventListener('focusin',function(e){var t=e.target;if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))setTimeout(function(){try{t.scrollIntoView({block:'center',behavior:'smooth'})}catch(x){}},350)});
 var views={
 home:function(){var cm=today().slice(0,7),I=sum(mTx(cm,'in')),E=sum(mTx(cm,'out')),pm=addMo(cm,-1),pn=sum(mTx(pm,'in'))-sum(mTx(pm,'out')),net=I-E,dl=pn?Math.round((net-pn)/Math.abs(pn)*100):null,al=attnList(),rec=S.tx.slice().sort(function(a,b){return a.date<b.date?1:-1}).slice(0,5);
  return '<div class="card"><div class="mut">נטו ב'+mname(cm)+'</div><div class="big '+(net>=0?'ok':'bad')+'">'+fmt(net)+'</div><div class="mut">'+(dl==null?'אין נתוני חודש קודם להשוואה':(dl>=0?'▲ ':'▼ ')+Math.abs(dl)+'% לעומת החודש הקודם')+'</div><div class="grid2"><div><div class="mut">הכנסות</div><b class="ok">'+fmt(I)+'</b></div><div><div class="mut">הוצאות</div><b class="bad">'+fmt(E)+'</b></div></div></div>'+
@@ -337,7 +364,7 @@ document.addEventListener('change',function(e){var t=e.target;
 document.addEventListener('input',function(e){if(e.target.id==='sq'||e.target.id==='sp')updTot()});
 try{if(window.Android&&Android.saveData)Android.saveData(JSON.stringify(S))}catch(e){}
 setInterval(tgPoll,15000);setTimeout(tgPoll,1500);
-function importPending(a){try{a.forEach(function(x){S.tx.push({id:uid(),type:'out',amt:x.amt,desc:x.desc,cat:x.cat,date:x.date})});save();render()}catch(e){}}
+function importPending(a){try{a.forEach(function(x){S.tx.push({id:uid(),type:'out',amt:x.amt,desc:x.desc,cat:x.cat,date:x.date})});save();bgRender()}catch(e){}}
 render();
 </script>
 </body>
