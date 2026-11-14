@@ -3,6 +3,7 @@ package com.family.manager
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -29,6 +30,13 @@ class MainActivity : Activity() {
             @JavascriptInterface fun setTelegram(t: String, c: String, on: Boolean) {
                 getSharedPreferences("fm", 0).edit().putString("tgt", t).putString("tgc", c).putBoolean("tgon", on).apply()
             }
+            @JavascriptInterface fun saveData(s: String) { try { java.io.File(filesDir, "data.json").writeText(s) } catch (e: Exception) {} }
+            @JavascriptInterface fun loadData(): String = try { java.io.File(filesDir, "data.json").readText() } catch (e: Exception) { "" }
+            @JavascriptInterface fun notifOn(): Boolean = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")?.contains(packageName) == true
+            @JavascriptInterface fun openSettings(w: String) {
+                val i = if (w == "app") Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(Uri.parse("package:$packageName")) else Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
+                startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            }
         }, "Android")
         w.webViewClient = object : WebViewClient() {
             override fun onPageFinished(v: WebView, u: String) { loaded = true; push() }
@@ -42,8 +50,13 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         push()
+        if (loaded) w.evaluateJavascript("if(window.render)render()", null)
         val on = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")?.contains(packageName) == true
-        if (!on && !asked) { asked = true; startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")) }
+        val pf = getSharedPreferences("fm", 0)
+        if (!on && !asked && !pf.getBoolean("askedN", false)) {
+            asked = true; pf.edit().putBoolean("askedN", true).apply()
+            startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"))
+        }
     }
 
     private fun push() {
